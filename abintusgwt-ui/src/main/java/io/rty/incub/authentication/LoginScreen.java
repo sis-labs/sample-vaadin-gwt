@@ -30,35 +30,41 @@ public class LoginScreen extends FlexLayout {
     private Button forgotPassword;
     private AccessControl accessControl;
 
+    /**
+     * Default constructor
+     */
     public LoginScreen() {
         accessControl = AccessControlFactory.getInstance().createAccessControl();
         buildUI();
         username.focus();
     }
 
+    /**
+     * Set up the UI
+     */
     private void buildUI() {
         setSizeFull();
         setClassName("login-screen");
 
         // login form, centered in the available part of the screen
-        Component loginForm = buildLoginForm();
+        final Component loginForm = buildLoginForm();
 
         // layout to center login form when there is sufficient screen space
-        FlexLayout centeringLayout = new FlexLayout();
+        final FlexLayout centeringLayout = new FlexLayout();
         centeringLayout.setSizeFull();
         centeringLayout.setJustifyContentMode(JustifyContentMode.CENTER);
         centeringLayout.setAlignItems(Alignment.CENTER);
         centeringLayout.add(loginForm);
 
         // information text about logging in
-        Component loginInformation = buildLoginInformation();
+        final Component loginInformation = buildLoginInformation();
 
         add(loginInformation);
         add(centeringLayout);
     }
 
     private Component buildLoginForm() {
-        FormLayout loginForm = new FormLayout();
+        final FormLayout loginForm = new FormLayout();
 
         loginForm.setWidth("310px");
 
@@ -86,12 +92,11 @@ public class LoginScreen extends FlexLayout {
     }
 
     private Component buildLoginInformation() {
-        VerticalLayout loginInformation = new VerticalLayout();
+        final VerticalLayout loginInformation = new VerticalLayout();
         loginInformation.setClassName("login-information");
 
-        H1 loginInfoHeader = new H1("Login Information");
-        Span loginInfoText = new Span(
-                "Log in as \"admin\" to have full access. Log in with any other username to have read-only access. For all users, any password is fine.");
+        final H1 loginInfoHeader = new H1("Waldogm");
+        final Span loginInfoText = new Span("Welcome to the dashboard, pelase login");
         loginInformation.add(loginInfoHeader);
         loginInformation.add(loginInfoText);
 

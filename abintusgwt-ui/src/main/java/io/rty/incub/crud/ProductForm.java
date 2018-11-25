@@ -9,6 +9,8 @@ import java.util.Locale;
 
 import org.vaadin.pekka.CheckboxGroup;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -25,11 +27,13 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import io.rty.incub.backend.data.Availability;
 import io.rty.incub.backend.data.Category;
 import io.rty.incub.backend.data.Product;
+import io.rty.incub.shared.BaseSideForm;
+import io.rty.incub.shared.FunctionalUtilities;
 
 /**
  * A form for editing a single product.
  */
-public class ProductForm extends Div {
+public class ProductForm extends BaseSideForm<Product> {
 
     private VerticalLayout content;
 
@@ -44,8 +48,6 @@ public class ProductForm extends Div {
     private Button delete;
 
     private SampleCrudLogic viewLogic;
-    private Binder<Product> binder;
-    private Product currentProduct;
 
     private static class PriceConverter extends StringToBigDecimalConverter {
 
@@ -78,7 +80,7 @@ public class ProductForm extends Div {
             // number expects a fixed wire/DOM number format regardless
             // of how the browser presents it to the user (which could
             // depend on the browser locale).
-            DecimalFormat format = new DecimalFormat();
+            final DecimalFormat format = new DecimalFormat();
             format.setMaximumFractionDigits(0);
             format.setDecimalSeparatorAlwaysShown(false);
             format.setParseIntegerOnly(true);
@@ -86,54 +88,57 @@ public class ProductForm extends Div {
             return format;
         }
     }
-
-    public ProductForm(SampleCrudLogic sampleCrudLogic) {
-        setClassName("product-form");
-
-        content = new VerticalLayout();
-        content.setSizeUndefined();
-        add(content);
-
-        viewLogic = sampleCrudLogic;
-
-        productName = new TextField("Product name");
+    
+    private void createProductField() {
+    	productName = new TextField("Product name");
         productName.setWidth("100%");
         productName.setRequired(true);
         productName.setValueChangeMode(ValueChangeMode.EAGER);
         content.add(productName);
-
-        price = new TextField("Price");
+    }
+    
+    private void createPriceAndStockFields() {
+    	// create the price field
+    	price = new TextField("Price");
         price.setSuffixComponent(new Span("€"));
         price.getElement().getThemeList().add("align-right");
         price.setValueChangeMode(ValueChangeMode.EAGER);
-
+        
+        // create the stock field
         stockCount = new TextField("In stock");
         stockCount.getElement().getThemeList().add("align-right");
         stockCount.setValueChangeMode(ValueChangeMode.EAGER);
 
-        HorizontalLayout horizontalLayout = new HorizontalLayout(price,
+        // align both on the same line
+        final HorizontalLayout horizontalLayout = new HorizontalLayout(price,
                 stockCount);
         horizontalLayout.setWidth("100%");
         horizontalLayout.setFlexGrow(1, price, stockCount);
         content.add(horizontalLayout);
-
-        availability = new ComboBox<>("Availability");
+    }
+    
+    private void createAvailabilityField() {
+    	availability = new ComboBox<>("Availability");
         availability.setWidth("100%");
         availability.setRequired(true);
         availability.setItems(Availability.values());
         availability.setAllowCustomValue(false);
         content.add(availability);
-
-        category = new CheckboxGroup<>();
+    }
+    
+    private void createCategoryField() {
+    	category = new CheckboxGroup<>();
         category.setId("category");
         category.getContent().getStyle().set("flex-direction", "column")
                 .set("margin", "0");
-        Label categoryLabel = new Label("Categories");
+        final Label categoryLabel = new Label("Categories");
         categoryLabel.setClassName("vaadin-label");
         categoryLabel.setFor(category);
         content.add(categoryLabel, category);
-
-        binder = new BeanValidationBinder<>(Product.class);
+    }
+    
+    protected void setUpBinder() {
+    	binder = new BeanValidationBinder<>(Product.class);
         binder.forField(price).withConverter(new PriceConverter())
                 .bind("price");
         binder.forField(stockCount).withConverter(new StockCountConverter())
@@ -147,40 +152,44 @@ public class ProductForm extends Div {
             save.setEnabled(hasChanges && isValid);
             discard.setEnabled(hasChanges);
         });
-
-        save = new Button("Save");
-        save.setWidth("100%");
-        save.getElement().getThemeList().add("primary");
-        save.addClickListener(event -> {
-            if (currentProduct != null
-                    && binder.writeBeanIfValid(currentProduct)) {
-                viewLogic.saveProduct(currentProduct);
+    }
+    
+    protected ComponentEventListener<ClickEvent<Button>> saveClickListener() {
+    	return event -> {
+            if (currentItem != null
+                    && binder.writeBeanIfValid(currentItem)) {
+                viewLogic.saveProduct(currentItem);
             }
-        });
-
-        discard = new Button("Discard changes");
-        discard.setWidth("100%");
-        discard.addClickListener(
-                event -> viewLogic.editProduct(currentProduct));
-
-        cancel = new Button("Cancel");
-        cancel.setWidth("100%");
-        cancel.addClickListener(event -> viewLogic.cancelProduct());
-        getElement()
-                .addEventListener("keydown", event -> viewLogic.cancelProduct())
-                .setFilter("event.key == 'Escape'");
-
-        delete = new Button("Delete");
-        delete.setWidth("100%");
-        delete.getElement().getThemeList()
-                .addAll(Arrays.asList("error", "primary"));
-        delete.addClickListener(event -> {
-            if (currentProduct != null) {
-                viewLogic.deleteProduct(currentProduct);
+        };     	
+    }
+    
+    protected ComponentEventListener<ClickEvent<Button>> discardClickListener() {
+    	return event -> viewLogic.editProduct(currentItem);
+    }
+    
+    protected ComponentEventListener<ClickEvent<Button>> cancelClickListener() {
+    	return event -> viewLogic.cancelProduct();
+    }
+    
+    protected ComponentEventListener<ClickEvent<Button>> deleteClickListener() {
+    	return event -> {
+            if (currentItem != null) {
+                viewLogic.deleteProduct(currentItem);
             }
-        });
-
-        content.add(save, discard, delete, cancel);
+        };
+    }
+    
+    public ProductForm(final SampleCrudLogic sampleCrudLogic) {
+        setClassName("product-form");
+        setUpViewLayout();
+        viewLogic = sampleCrudLogic;
+        createProductField();
+        createPriceAndStockFields();
+        createAvailabilityField();
+        createCategoryField();
+        setUpBinder();
+        createButtons();
+        onEscape(event -> viewLogic.cancelProduct());
     }
 
     public void setCategories(Collection<Category> categories) {
@@ -188,11 +197,8 @@ public class ProductForm extends Div {
     }
 
     public void editProduct(Product product) {
-        if (product == null) {
-            product = new Product();
-        }
-        delete.setVisible(!product.isNewProduct());
-        currentProduct = product;
-        binder.readBean(product);
+        final Product p = FunctionalUtilities.ensureInstance(product, Product.class);
+        delete.setVisible(!p.isNewProduct());
+        editItem(p);
     }
 }

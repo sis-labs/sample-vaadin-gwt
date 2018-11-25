@@ -16,11 +16,23 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
 
+/**
+ * Implementation of the side menu.
+ * 
+ * This is a simple holder for a set of links to view which often 
+ * embed a part of the application.
+ * 
+ * @author mlefebvre
+ *
+ */
 public class Menu extends FlexLayout {
 
     private static final String SHOW_TABS = "show-tabs";
     private Tabs tabs;
 
+    /**
+     * Default constructor
+     */
     public Menu() {
         setClassName("menu-bar");
 
@@ -46,11 +58,11 @@ public class Menu extends FlexLayout {
 
         // Note! Image resource url is resolved here as it is dependent on the
         // execution mode (development or production) and browser ES level support
-        String resolvedImage = VaadinServletService.getCurrent()
+        final String resolvedImage = VaadinServletService.getCurrent()
                 .resolveResource("frontend://img/table-logo.png",
                         VaadinSession.getCurrent().getBrowser());
 
-        Image image = new Image(resolvedImage, "");
+        final Image image = new Image(resolvedImage, "");
         top.add(image);
         top.add(title);
         add(top);
@@ -62,7 +74,7 @@ public class Menu extends FlexLayout {
         add(tabs);
 
         // logout menu item
-        Button logoutButton = new Button("Logout",
+        final Button logoutButton = new Button("Logout",
                 VaadinIcon.SIGN_OUT.create());
         logoutButton.addClickListener(event -> {
             VaadinSession.getCurrent().getSession().invalidate();
@@ -85,8 +97,8 @@ public class Menu extends FlexLayout {
      */
     public void addView(Class<? extends Component> viewClass, String caption,
             Icon icon) {
-        Tab tab = new Tab();
-        RouterLink routerLink = new RouterLink(null, viewClass);
+        final Tab tab = new Tab();
+        final RouterLink routerLink = new RouterLink(null, viewClass);
         routerLink.setClassName("menu-link");
         routerLink.add(icon);
         routerLink.add(new Span(caption));

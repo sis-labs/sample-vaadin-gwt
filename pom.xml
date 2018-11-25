@@ -4,7 +4,7 @@
 	<groupId>io.rty.incub</groupId>
 	<artifactId>abintusgwt</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>AbintusGwt</name>
 
     <properties>
@@ -22,6 +22,11 @@
     <prerequisites>
         <maven>3</maven>
     </prerequisites>
+
+    <modules>
+        <module>abintusgwt-backend</module>
+        <module>abintusgwt-ui</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -47,9 +52,4 @@
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
-
-    <modules>
-        <module>abintusgwt-backend</module>
-        <module>abintusgwt-ui</module>
-    </modules>
 </project>
