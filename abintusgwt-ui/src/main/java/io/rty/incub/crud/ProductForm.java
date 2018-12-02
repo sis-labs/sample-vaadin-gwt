@@ -35,17 +35,11 @@ import io.rty.incub.shared.FunctionalUtilities;
  */
 public class ProductForm extends BaseSideForm<Product> {
 
-    private VerticalLayout content;
-
     private TextField productName;
     private TextField price;
     private TextField stockCount;
     private ComboBox<Availability> availability;
     private CheckboxGroup<Category> category;
-    private Button save;
-    private Button discard;
-    private Button cancel;
-    private Button delete;
 
     private SampleCrudLogic viewLogic;
 
@@ -180,6 +174,7 @@ public class ProductForm extends BaseSideForm<Product> {
     }
     
     public ProductForm(final SampleCrudLogic sampleCrudLogic) {
+    	super();
         setClassName("product-form");
         setUpViewLayout();
         viewLogic = sampleCrudLogic;
